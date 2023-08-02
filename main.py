@@ -1,11 +1,10 @@
 import csv
-import timedinput
+from timedinput import timedinput
 import time
 from datetime import datetime, date
 import schedule
 import smtplib
 from email.message import EmailMessage
-import os
 import config
 
 CSV_FILE_NAME = "attendance.csv"
@@ -31,8 +30,6 @@ def send_email():
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp_server:
         smtp_server.login(config.from_email, config.password)
         smtp_server.sendmail(config.from_email, config.to_emails, msg.as_string())
-
-    os.remove(CSV_FILE_NAME)
 
 
 # Schedule the CSV file setup
@@ -65,7 +62,9 @@ while True:
     )
 
     if now > today_open_time and now < today_close_time:  # If accepting swipes
-        card_info = timedinput("Swipe your badge: ", timeout=config.swipe_timeout)
+        card_info = timedinput(
+            "Swipe your badge: ", timeout=config.swipe_timeout, default="=="
+        )
         print(f"Here's what I got: {card_info}")
         badge_id = card_info.split("=")[1]
         ts_str = datetime.now().__str__()

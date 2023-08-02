@@ -56,7 +56,8 @@ while True:
         card_info = timedinput(
             "Swipe badge: ", timeout=config.swipe_timeout, default="TIMEOUT"
         )
-        if "=" not in card_info:  # If the swipe returns an error
+        if card_info != "TIMEOUT" and "=" not in card_info:
+            #  If the swipe returns an error
             print("\a")  # Ring alarm
         elif card_info != "TIMEOUT":  # If the input didn't time out
             print(f"Here's what I got: {card_info}")

@@ -63,16 +63,17 @@ while True:
 
     if now > today_open_time and now < today_close_time:  # If accepting swipes
         card_info = timedinput(
-            "Swipe your badge: ", timeout=config.swipe_timeout, default="=="
+            "Swipe badge: ", timeout=config.swipe_timeout, default="TIMEOUT"
         )
-        print(f"Here's what I got: {card_info}")
-        badge_id = card_info.split("=")[1]
-        ts_str = datetime.now().__str__()
+        if card_info != "TIMEOUT":  # If the input didn't time out
+            print(f"Here's what I got: {card_info}")
+            badge_id = card_info.split("=")[1]
+            ts_str = datetime.now().__str__()
 
-        # Write to the CSV file
-        with open(CSV_FILE_NAME, mode="a", encoding="UTF8") as f:
-            writer = csv.writer(f)
-            writer.writerow([badge_id, ts_str])
+            # Write to the CSV file
+            with open(CSV_FILE_NAME, mode="a", encoding="UTF8") as f:
+                writer = csv.writer(f)
+                writer.writerow([badge_id, ts_str])
     else:  # If not accepting swipes
         schedule.run_pending()
         time.sleep(1800)  # Pause for 30 minutes

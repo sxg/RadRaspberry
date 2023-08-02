@@ -75,5 +75,6 @@ while True:
                 writer = csv.writer(f)
                 writer.writerow([badge_id, ts_str])
     else:  # If not accepting swipes
+        print("Not currently accepting swipes.")
         schedule.run_pending()
         time.sleep(1800)  # Pause for 30 minutes

@@ -65,7 +65,9 @@ while True:
         card_info = timedinput(
             "Swipe badge: ", timeout=config.swipe_timeout, default="TIMEOUT"
         )
-        if card_info != "TIMEOUT":  # If the input didn't time out
+        if "=" not in card_info:  # If the swipe returns an error
+            print("\a")  # Ring alarm
+        elif card_info != "TIMEOUT":  # If the input didn't time out
             print(f"Here's what I got: {card_info}")
             badge_id = card_info.split("=")[1]
             ts_str = datetime.now().__str__()
@@ -77,4 +79,4 @@ while True:
     else:  # If not accepting swipes
         print("Not currently accepting swipes.")
         schedule.run_pending()
-        time.sleep(1800)  # Pause for 30 minutes
+        time.sleep(5)  # Pause for 30 minutes

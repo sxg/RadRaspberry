@@ -60,7 +60,6 @@ while True:
             #  If the swipe returns an error
             print("\a")  # Ring alarm
         elif card_info != "TIMEOUT":  # If the input didn't time out
-            print(f"Here's what I got: {card_info}")
             badge_id = card_info.split("=")[1]
             ts_str = datetime.now().__str__()
 

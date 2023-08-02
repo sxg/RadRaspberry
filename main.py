@@ -10,6 +10,13 @@ import config
 CSV_FILE_NAME = "attendance.csv"
 
 
+def setup_csv():
+    # Overwrite the existing CSV file with a new one including headers
+    with open(CSV_FILE_NAME, mode="w", encoding="UTF8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["Badge ID", "Badge Swipe Time"])
+
+
 def send_email():
     msg = EmailMessage()
     with open(CSV_FILE_NAME, mode="r", encoding="UTF8") as f:
@@ -26,6 +33,13 @@ def send_email():
 
     os.remove(CSV_FILE_NAME)
 
+
+# Schedule the CSV file setup
+schedule.every().monday.at(config.open_time).do(setup_csv)
+schedule.every().tuesday.at(config.open_time).do(setup_csv)
+schedule.every().wednesday.at(config.open_time).do(setup_csv)
+schedule.every().thursday.at(config.open_time).do(setup_csv)
+schedule.every().friday.at(config.open_time).do(setup_csv)
 
 # Schedule the email
 schedule.every().monday.at(config.send_time).do(send_email)
@@ -56,7 +70,7 @@ while True:
         ts_str = datetime.now().__str__()
 
         # Write to the CSV file
-        with open(CSV_FILE_NAME, mode="w", encoding="UTF8") as f:
+        with open(CSV_FILE_NAME, mode="a", encoding="UTF8") as f:
             writer = csv.writer(f)
             writer.writerow([badge_id, ts_str])
     else:  # If not accepting swipes

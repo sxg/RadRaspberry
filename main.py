@@ -1,4 +1,5 @@
 import csv
+import timedinput
 import time
 from datetime import datetime, date
 import schedule
@@ -42,29 +43,29 @@ schedule.every().thursday.at(config.open_time).do(setup_csv)
 schedule.every().friday.at(config.open_time).do(setup_csv)
 
 # Schedule the email
-schedule.every().monday.at(config.send_time).do(send_email)
-schedule.every().tuesday.at(config.send_time).do(send_email)
-schedule.every().wednesday.at(config.send_time).do(send_email)
-schedule.every().thursday.at(config.send_time).do(send_email)
-schedule.every().friday.at(config.send_time).do(send_email)
+schedule.every().monday.at(config.close_time).do(send_email)
+schedule.every().tuesday.at(config.close_time).do(send_email)
+schedule.every().wednesday.at(config.close_time).do(send_email)
+schedule.every().thursday.at(config.close_time).do(send_email)
+schedule.every().friday.at(config.close_time).do(send_email)
 
 while True:
     now = datetime.now()
-    today_send_time = now.replace(
-        hour=int(config.send_time.split(":")[0]),
-        minute=int(config.send_time.split(":")[1]),
-        second=0,
-        microsecond=0,
-    )
     today_open_time = now.replace(
         hour=int(config.open_time.split(":")[0]),
         minute=int(config.open_time.split(":")[1]),
         second=0,
         microsecond=0,
     )
+    today_close_time = now.replace(
+        hour=int(config.close_time.split(":")[0]),
+        minute=int(config.close_time.split(":")[1]),
+        second=0,
+        microsecond=0,
+    )
 
-    if now > today_open_time and now < today_send_time:  # If accepting swipes
-        card_info = input("Swipe your badge: ")
+    if now > today_open_time and now < today_close_time:  # If accepting swipes
+        card_info = timedinput("Swipe your badge: ", timeout=config.swipe_timeout)
         print(f"Here's what I got: {card_info}")
         badge_id = card_info.split("=")[1]
         ts_str = datetime.now().__str__()

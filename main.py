@@ -1,5 +1,7 @@
 import csv
 import os
+import sys
+from termios import tcflush, TCIOFLUSH
 from timedinput import timedinput
 import time
 from datetime import datetime, date
@@ -62,6 +64,7 @@ while True:
     )
 
     if now > today_open_time and now < today_close_time:  # If accepting swipes
+        tcflush(sys.stdin, TCIOFLUSH)  # Flush stdin before taking new input
         card_info = timedinput(
             "Swipe badge: ", timeout=config.swipe_timeout, default="TIMEOUT"
         )

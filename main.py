@@ -33,13 +33,9 @@ def send_email():
         smtp_server.login(config.from_email, config.password)
         smtp_server.sendmail(config.from_email, config.to_emails, msg.as_string())
 
+    # Reset the CSV file
+    setup_csv_file()
 
-# Setup the CSV file on schedule
-schedule.every().monday.at(config.open_time).do(setup_csv_file)
-schedule.every().tuesday.at(config.open_time).do(setup_csv_file)
-schedule.every().wednesday.at(config.open_time).do(setup_csv_file)
-schedule.every().thursday.at(config.open_time).do(setup_csv_file)
-schedule.every().friday.at(config.open_time).do(setup_csv_file)
 
 # Schedule the email
 schedule.every().monday.at(config.close_time).do(send_email)

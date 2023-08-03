@@ -82,4 +82,4 @@ while True:
     else:  # If not accepting swipes
         print("Not currently accepting swipes.")
         schedule.run_pending()
-        time.sleep(1800)  # Pause for 30 minutes
+        time.sleep(config.swipe_timeout)

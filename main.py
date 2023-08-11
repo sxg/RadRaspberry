@@ -16,7 +16,7 @@ CSV_FILE_NAME = "attendance.csv"
 def setup_csv_file():
     with open(CSV_FILE_NAME, mode="w", encoding="UTF8") as f:
         writer = csv.writer(f)
-        writer.writerow(["Badge ID", "Badge Swipe Time"])
+        writer.writerow(["Penn ID", "Badge ID", "All Swipe Data", "Badge Swipe Time"])
 
 
 def send_email():
@@ -65,9 +65,10 @@ while True:
             "Swipe badge: ", timeout=config.swipe_timeout, default="TIMEOUT"
         )
         if (
-            card_info != "TIMEOUT" and card_info.count("=") == 2
+            card_info != "TIMEOUT" and card_info.count("=") == 2 and len(card_info) > 15
         ):  # If the input didn't time out and format basically makes sense
-            badge_id = card_info.split("=")[1]
+            penn_id = card_info.split("?")[0].split("%")[1][:1]  # Remove trailing '0'
+            badge_id = card_info.split("=")[1][1:]  # Remove leading '1'
             ts_str = datetime.now().__str__()
 
             # Ensure the CSV file exists
@@ -77,7 +78,7 @@ while True:
             # Write to the CSV file
             with open(CSV_FILE_NAME, mode="a", encoding="UTF8") as f:
                 writer = csv.writer(f)
-                writer.writerow([badge_id, ts_str])
+                writer.writerow([penn_id, badge_id, card_info, ts_str])
     else:  # If not accepting swipes
         print("Not currently accepting swipes.")
         schedule.run_pending()

@@ -67,7 +67,7 @@ while True:
         if (
             card_info != "TIMEOUT" and card_info.count("=") == 2 and len(card_info) > 15
         ):  # If the input didn't time out and format basically makes sense
-            penn_id = card_info.split("?")[0].split("%")[1][:1]  # Remove trailing '0'
+            penn_id = card_info.split("?")[0].split("%")[1][:-1]  # Remove trailing '0'
             badge_id = card_info.split("=")[1][1:]  # Remove leading '1'
             ts_str = datetime.now().__str__()
 

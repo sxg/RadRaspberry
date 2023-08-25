@@ -25,6 +25,9 @@ python /path/to/script/rad_raspberry/main.py
 This is a bare bones script, and so is the "automatic update" mechanism. Just pull the repository from GitHub in `~/.bashrc` before running the script:
 
 ```python
+sleep 30
 git -C /path/to/script/rad_raspberry pull origin main
 python /path/to/script/rad_raspberry/main.py
 ```
+
+The `sleep 30` command pauses for 30 seconds to allow the Raspberry Pi time to connect to WiFi.

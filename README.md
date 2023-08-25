@@ -11,3 +11,20 @@ open_time = "06:30"  # When to start accepting swipes (24 hr time)
 close_time = "08:25"  # When to stop accepting swipes (24 hr time)
 swipe_timeout = 3600  # Number of seconds to wait after last swipe
 ```
+
+# Installation
+
+This script is intended to run on a Raspberry Pi in headless mode. To have the script automatically run when starting the Raspberry Pi, call the script from `~/.bashrc`:
+
+```python
+python /path/to/script/rad_raspberry/main.py
+````
+
+# Automatic Updates
+
+This is a bare bones script, and so is the "automatic update" mechanism. Just pull the repository from GitHub in `~/.bashrc` before running the script:
+
+```python
+git -C /path/to/script/rad_raspberry pull origin main
+python /path/to/script/rad_raspberry/main.py
+```

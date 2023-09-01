@@ -8,33 +8,49 @@ from datetime import datetime, date
 import schedule
 import smtplib
 from email.message import EmailMessage
+import logging
 import config
 
 CSV_FILE_NAME = "attendance.csv"
+
+# Configure logging
+logging.basicConfig(
+    filename="rad_raspberry.log",
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)s]: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 
 def setup_csv_file():
     with open(CSV_FILE_NAME, mode="w", encoding="UTF8") as f:
         writer = csv.writer(f)
-        writer.writerow(["Penn ID", "Badge ID", "All Swipe Data", "Badge Swipe Time"])
+        writer.writerow(
+            ["Penn ID", "Badge ID", "All Swipe Data", "Badge Swipe Time"]
+        )
 
 
 def send_email():
-    msg = EmailMessage()
-    with open(CSV_FILE_NAME, mode="r", encoding="UTF8") as f:
-        msg.set_content(f.read())
-        msg["Subject"] = config.email_subject + date.today().strftime(
-            " (%A, %B %d, %Y)"
-        )
-        msg["From"] = config.from_email
-        msg["To"] = ", ".join(config.to_emails)
+    try:
+        msg = EmailMessage()
+        with open(CSV_FILE_NAME, mode="r", encoding="UTF8") as f:
+            msg.set_content(f.read())
+            msg["Subject"] = config.email_subject + date.today().strftime(
+                " (%A, %B %d, %Y)"
+            )
+            msg["From"] = config.from_email
+            msg["To"] = ", ".join(config.to_emails)
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp_server:
-        smtp_server.login(config.from_email, config.password)
-        smtp_server.sendmail(config.from_email, config.to_emails, msg.as_string())
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp_server:
+            smtp_server.login(config.from_email, config.password)
+            smtp_server.sendmail(
+                config.from_email, config.to_emails, msg.as_string()
+            )
 
-    # Reset the CSV file
-    setup_csv_file()
+        # Reset the CSV file
+        setup_csv_file()
+    except Exception as e:
+        logging.error(f"An error occurred: {str(e)}")
 
 
 # Schedule the email
@@ -65,9 +81,13 @@ while True:
             "Swipe badge: ", timeout=config.swipe_timeout, default="TIMEOUT"
         )
         if (
-            card_info != "TIMEOUT" and card_info.count("=") == 2 and len(card_info) > 15
+            card_info != "TIMEOUT"
+            and card_info.count("=") == 2
+            and len(card_info) > 15
         ):  # If the input didn't time out and format basically makes sense
-            penn_id = card_info.split("?")[0].split("%")[1][:-1]  # Remove trailing '0'
+            penn_id = card_info.split("?")[0].split("%")[1][
+                :-1
+            ]  # Remove trailing '0'
             badge_id = card_info.split("=")[1][1:]  # Remove leading '1'
             ts_str = datetime.now().__str__()
 

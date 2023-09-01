@@ -9,6 +9,7 @@ import schedule
 import smtplib
 from email.message import EmailMessage
 import logging
+import shutil
 import config
 
 CSV_FILE_NAME = "attendance.csv"
@@ -32,6 +33,10 @@ def setup_csv_file():
 
 def send_email():
     try:
+        shutil.copy(
+            CSV_FILE_NAME,
+            "attendance-" + date.today().strftime("%Y-%m-%d.csv"),
+        )  # Copy the working attendance file and save it as a backup
         msg = EmailMessage()
         with open(CSV_FILE_NAME, mode="r", encoding="UTF8") as f:
             msg.set_content(f.read())

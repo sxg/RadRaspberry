@@ -64,7 +64,6 @@ schedule.every().tuesday.at(config.close_time).do(send_email)
 schedule.every().wednesday.at(config.close_time).do(send_email)
 schedule.every().thursday.at(config.close_time).do(send_email)
 schedule.every().friday.at(config.close_time).do(send_email)
-schedule.every().saturday.at(config.close_time).do(send_email)
 
 while True:
     now = datetime.now()

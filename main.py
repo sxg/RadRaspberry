@@ -6,13 +6,14 @@ from timedinput import timedinput
 import time
 from datetime import datetime, date
 import schedule
-import smtplib
-from email.message import EmailMessage
+import resend
 import logging
 import shutil
 import config
 
 CSV_FILE_NAME = "attendance.csv"
+
+resend.api_key = config.api_key
 
 # Configure logging
 logging.basicConfig(
@@ -35,27 +36,31 @@ def send_email():
     try:
         shutil.copy(
             CSV_FILE_NAME,
-            "attendance-" + date.today().strftime("%Y-%m-%d.csv"),
+            "backup-" + date.today().strftime("%Y-%m-%d.csv"),
         )  # Copy the working attendance file and save it as a backup
-        msg = EmailMessage()
         with open(CSV_FILE_NAME, mode="r", encoding="UTF8") as f:
-            msg.set_content(f.read())
-            msg["Subject"] = config.email_subject + date.today().strftime(
-                " (%A, %B %d, %Y)"
-            )
-            msg["From"] = config.from_email
-            msg["To"] = ", ".join(config.to_emails)
-
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp_server:
-            smtp_server.login(config.from_email, config.password)
-            smtp_server.sendmail(
-                config.from_email, config.to_emails, msg.as_string()
-            )
+            try:
+                email = resend.Emails.send(
+                    {
+                        "from": config.from_email,
+                        "to": config.to_emails,
+                        "subject": config.email_subject
+                        + date.today().strftime(" (%A, %B %d, %Y)"),
+                        "html": f.read(),
+                    }
+                )
+                logging.info(f"Email sent: {email}")
+            except Exception as e:
+                logging.error(
+                    f"An error occurred in sending an email: {str(e)}"
+                )
 
         # Reset the CSV file
         setup_csv_file()
     except Exception as e:
-        logging.error(f"An error occurred: {str(e)}")
+        logging.error(
+            f"An error occurred in backing up the attendance file: {str(e)}"
+        )
 
 
 # Schedule the email

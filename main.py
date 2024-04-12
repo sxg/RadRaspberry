@@ -42,7 +42,7 @@ def send_email():
             try:
                 email = resend.Emails.send(
                     {
-                        "html": f.read(),
+                        "text": f.read(),
                         "from": config.from_email,
                         "to": config.to_emails,
                         "subject": f"{config.email_subject} {date.today().strftime(' (%A, %B %d, %Y)')}",

@@ -38,14 +38,22 @@ def send_email():
             CSV_FILE_NAME,
             "backup-" + date.today().strftime("%Y-%m-%d.csv"),
         )  # Copy the working attendance file and save it as a backup
-        with open(CSV_FILE_NAME, mode="r", encoding="UTF8") as f:
+        with open(CSV_FILE_NAME, mode="rb") as f:
             try:
+                buffer = f.read()
+                body = buffer.decode("UTF-8")
                 email = resend.Emails.send(
                     {
-                        "text": f.read(),
+                        "text": body,
                         "from": config.from_email,
                         "to": config.to_emails,
                         "subject": f"{config.email_subject} {date.today().strftime(' (%A, %B %d, %Y)')}",
+                        "attachments": [
+                            {
+                                "filename": CSV_FILE_NAME,
+                                "content": list(buffer),
+                            }
+                        ],
                     }
                 )
                 logging.info(f"Email sent: {email}")

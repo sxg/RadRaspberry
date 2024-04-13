@@ -1,6 +1,6 @@
-import csv
 import os
 import sys
+import pandas as pd
 from termios import tcflush, TCIOFLUSH
 from timedinput import timedinput
 import time
@@ -11,7 +11,8 @@ import logging
 import shutil
 import config
 
-CSV_FILE_NAME = "attendance.csv"
+EXCEL_FILE_NAME = "attendance.xlsx"
+BACKUP_EXCEL_FILE_NAME = f"backup-{date.today().strftime('%Y-%m-%d')}.xlsx"
 
 resend.api_key = config.api_key
 
@@ -24,21 +25,20 @@ logging.basicConfig(
 )
 
 
-def setup_csv_file():
-    with open(CSV_FILE_NAME, mode="w", encoding="UTF8") as f:
-        writer = csv.writer(f)
-        writer.writerow(
-            ["Penn ID", "Badge ID", "All Swipe Data", "Badge Swipe Time"]
-        )
+def setup_excel_file():
+    # Creates a new Excel file with initial headers
+    df = pd.DataFrame(
+        columns=["Penn ID", "Badge ID", "All Swipe Data", "Badge Swipe Time"]
+    )
+    df.to_excel(EXCEL_FILE_NAME, index=False)
 
 
 def send_email():
     try:
         shutil.copy(
-            CSV_FILE_NAME,
-            "backup-" + date.today().strftime("%Y-%m-%d.csv"),
+            EXCEL_FILE_NAME, BACKUP_EXCEL_FILE_NAME
         )  # Copy the working attendance file and save it as a backup
-        with open(CSV_FILE_NAME, mode="rb") as f:
+        with open(EXCEL_FILE_NAME, mode="rb") as f:
             try:
                 buffer = f.read()
                 body = buffer.decode("UTF-8")
@@ -50,7 +50,7 @@ def send_email():
                         "subject": f"{config.email_subject} {date.today().strftime(' (%A, %B %d, %Y)')}",
                         "attachments": [
                             {
-                                "filename": CSV_FILE_NAME,
+                                "filename": EXCEL_FILE_NAME,
                                 "content": list(buffer),
                             }
                         ],
@@ -62,8 +62,8 @@ def send_email():
                     f"An error occurred in sending an email: {str(e)}"
                 )
 
-        # Reset the CSV file
-        setup_csv_file()
+        # Reset the Excel file
+        setup_excel_file()
     except Exception as e:
         logging.error(
             f"An error occurred in backing up the attendance file: {str(e)}"
@@ -108,14 +108,23 @@ while True:
             badge_id = card_info.split("=")[1][1:]  # Remove leading '1'
             ts_str = datetime.now().__str__()
 
-            # Ensure the CSV file exists
-            if not os.path.exists(CSV_FILE_NAME):
-                setup_csv_file()
+            # Ensure the Excel file exists
+            if not os.path.exists(EXCEL_FILE_NAME):
+                setup_excel_file()
 
-            # Write to the CSV file
-            with open(CSV_FILE_NAME, mode="a", encoding="UTF8") as f:
-                writer = csv.writer(f)
-                writer.writerow([penn_id, badge_id, card_info, ts_str])
+            # Write to the Excel file
+            df = pd.read_excel(EXCEL_FILE_NAME)
+            new_row = pd.DataFrame(
+                [[penn_id, badge_id, card_info, ts_str]],
+                columns=[
+                    "Penn ID",
+                    "Badge ID",
+                    "All Swipe Data",
+                    "Badge Swipe Time",
+                ],
+            )
+            df = pd.concat([df, new_row], ignore_index=True)
+            df.to_excel(EXCEL_FILE_NAME, index=False)
     else:  # If not accepting swipes
         print("Not currently accepting swipes.")
         schedule.run_pending()

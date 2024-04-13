@@ -41,10 +41,9 @@ def send_email():
         with open(EXCEL_FILE_NAME, mode="rb") as f:
             try:
                 buffer = f.read()
-                body = buffer.decode("UTF-8")
                 email = resend.Emails.send(
                     {
-                        "text": body,
+                        "text": config.email_subject,
                         "from": config.from_email,
                         "to": config.to_emails,
                         "subject": f"{config.email_subject} {date.today().strftime(' (%A, %B %d, %Y)')}",
@@ -76,6 +75,7 @@ schedule.every().tuesday.at(config.close_time).do(send_email)
 schedule.every().wednesday.at(config.close_time).do(send_email)
 schedule.every().thursday.at(config.close_time).do(send_email)
 schedule.every().friday.at(config.close_time).do(send_email)
+schedule.every().saturday.at(config.close_time).do(send_email)
 
 while True:
     now = datetime.now()

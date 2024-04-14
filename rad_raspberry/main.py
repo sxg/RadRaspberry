@@ -138,7 +138,7 @@ def main():
         else:  # If not accepting swipes
             print("Not currently accepting swipes.")
             schedule.run_pending()
-            time.sleep(int(config["operation"]["swipe_timeout"]))
+            time.sleep(int(config["Operation"]["swipe_timeout"]))
 
 
 if __name__ == "__main__":

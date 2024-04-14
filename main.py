@@ -18,7 +18,7 @@ resend.api_key = config.api_key
 
 # Configure logging
 logging.basicConfig(
-    filename="rad_raspberry.log",
+    filename="/var/log/rad_raspberry.log",
     level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s]: %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",

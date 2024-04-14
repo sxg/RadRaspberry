@@ -4,6 +4,7 @@ setup(
     name="rad_raspberry",
     version="0.1.0",
     packages=find_packages(),
+    license="MIT",
     entry_points={
         "console_scripts": ["rad_raspberry=rad_raspberry.main:main"]
     },

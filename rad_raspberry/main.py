@@ -9,12 +9,15 @@ import schedule
 import resend
 import logging
 import shutil
-import config
+import configparser
+
+config = configparser.ConfigParser()
+config.read(os.path.expanduser("~/.config/rad_raspberry.ini"))
 
 EXCEL_FILE_NAME = "attendance.xlsx"
 BACKUP_EXCEL_FILE_NAME = f"backup-{date.today().strftime('%Y-%m-%d')}.xlsx"
 
-resend.api_key = config.api_key
+resend.api_key = config["API"]["api_key"]
 
 # Configure logging
 logging.basicConfig(
@@ -43,10 +46,10 @@ def send_email():
                 buffer = f.read()
                 email = resend.Emails.send(
                     {
-                        "text": config.email_subject,
-                        "from": config.from_email,
-                        "to": config.to_emails,
-                        "subject": f"{config.email_subject} {date.today().strftime(' (%A, %B %d, %Y)')}",
+                        "text": config["Email"]["email_subject"],
+                        "from": config["Email"]["from_email"],
+                        "to": list(config["Email"]["to_email"]),
+                        "subject": f"{config['Email']['email_subject']} {date.today().strftime(' (%A, %B %d, %Y)')}",
                         "attachments": [
                             {
                                 "filename": EXCEL_FILE_NAME,
@@ -70,26 +73,25 @@ def send_email():
 
 
 # Schedule the email
-schedule.every().monday.at(config.close_time).do(send_email)
-schedule.every().tuesday.at(config.close_time).do(send_email)
-schedule.every().wednesday.at(config.close_time).do(send_email)
-schedule.every().thursday.at(config.close_time).do(send_email)
-schedule.every().friday.at(config.close_time).do(send_email)
-schedule.every().saturday.at(config.close_time).do(send_email)
+schedule.every().monday.at(config["Operation"]["close_time"]).do(send_email)
+schedule.every().tuesday.at(config["Operation"]["close_time"]).do(send_email)
+schedule.every().wednesday.at(config["Operation"]["close_time"]).do(send_email)
+schedule.every().thursday.at(config["Operation"]["close_time"]).do(send_email)
+schedule.every().friday.at(config["Operation"]["close_time"]).do(send_email)
 
 
 def main():
     while True:
         now = datetime.now()
         today_open_time = now.replace(
-            hour=int(config.open_time.split(":")[0]),
-            minute=int(config.open_time.split(":")[1]),
+            hour=int(config["Operation"]["open_time"].split(":")[0]),
+            minute=int(config["Operation"]["open_time"].split(":")[1]),
             second=0,
             microsecond=0,
         )
         today_close_time = now.replace(
-            hour=int(config.close_time.split(":")[0]),
-            minute=int(config.close_time.split(":")[1]),
+            hour=int(config["Operation"]["close_time"].split(":")[0]),
+            minute=int(config["Operation"]["close_time"].split(":")[1]),
             second=0,
             microsecond=0,
         )
@@ -102,7 +104,7 @@ def main():
             )  # Flush stdin before taking new input
             card_info = timedinput(
                 "Swipe badge: ",
-                timeout=config.swipe_timeout,
+                timeout=int(config["Operation"]["swipe_timeout"]),
                 default="TIMEOUT",
             )
             if (
@@ -136,7 +138,7 @@ def main():
         else:  # If not accepting swipes
             print("Not currently accepting swipes.")
             schedule.run_pending()
-            time.sleep(config.swipe_timeout)
+            time.sleep(int(config["operation"]["swipe_timeout"]))
 
 
 if __name__ == "__main__":

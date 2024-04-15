@@ -78,7 +78,6 @@ schedule.every().tuesday.at(config["Operation"]["close_time"]).do(send_email)
 schedule.every().wednesday.at(config["Operation"]["close_time"]).do(send_email)
 schedule.every().thursday.at(config["Operation"]["close_time"]).do(send_email)
 schedule.every().friday.at(config["Operation"]["close_time"]).do(send_email)
-schedule.every().sunday.at(config["Operation"]["close_time"]).do(send_email)
 
 
 def main():

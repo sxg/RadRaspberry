@@ -22,7 +22,7 @@ os.makedirs(CONFIG_PATH, exist_ok=True)
 config = configparser.ConfigParser()
 config.read(os.path.join(CONFIG_PATH, "config.ini"))
 
-EXCEL_FILE_NAME = f"{config['Email']['attachment_prefix']}-{date.today().strftime('%Y-%m-%d %H:%M:%S')}.xlsx"
+EXCEL_FILE_NAME = f"{config['Email']['attachment_prefix']} ({datetime.now().strftime('%Y-%m-%d %H:%M:%S)')}.xlsx"
 
 resend.api_key = config["API"]["api_key"]
 

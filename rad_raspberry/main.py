@@ -48,7 +48,7 @@ def send_email():
                     {
                         "text": config["Email"]["email_subject"],
                         "from": config["Email"]["from_email"],
-                        "to": list(config["Email"]["to_email"]),
+                        "to": config["Email"]["to_email"],
                         "subject": f"{config['Email']['email_subject']} {date.today().strftime(' (%A, %B %d, %Y)')}",
                         "attachments": [
                             {
@@ -78,6 +78,7 @@ schedule.every().tuesday.at(config["Operation"]["close_time"]).do(send_email)
 schedule.every().wednesday.at(config["Operation"]["close_time"]).do(send_email)
 schedule.every().thursday.at(config["Operation"]["close_time"]).do(send_email)
 schedule.every().friday.at(config["Operation"]["close_time"]).do(send_email)
+schedule.every().sunday.at(config["Operation"]["close_time"]).do(send_email)
 
 
 def main():

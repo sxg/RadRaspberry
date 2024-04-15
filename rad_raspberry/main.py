@@ -11,17 +11,24 @@ import logging
 import shutil
 import configparser
 
-config = configparser.ConfigParser()
-config.read(os.path.expanduser("~/.config/rad_raspberry.ini"))
+# Create folders for logs, backups, and config file if needed
+LOG_PATH = os.path.expanduser("~/.local/state/rad_raspberry/log")
+BACKUP_PATH = os.path.expanduser("~/.local/state/rad_raspberry/backup")
+CONFIG_PATH = os.path.expanduser("~/.config/rad_raspberry")
+os.makedirs(LOG_PATH, exist_ok=True)
+os.makedirs(BACKUP_PATH, exist_ok=True)
+os.makedirs(CONFIG_PATH, exist_ok=True)
 
-EXCEL_FILE_NAME = "attendance.xlsx"
-BACKUP_EXCEL_FILE_NAME = f"backup-{date.today().strftime('%Y-%m-%d')}.xlsx"
+config = configparser.ConfigParser()
+config.read(os.path.join(CONFIG_PATH, "config.ini"))
+
+EXCEL_FILE_NAME = f"{config['Email']['attachment_prefix']}-{date.today().strftime('%Y-%m-%d %H:%M:%S')}.xlsx"
 
 resend.api_key = config["API"]["api_key"]
 
 # Configure logging
 logging.basicConfig(
-    filename="/var/log/rad_raspberry.log",
+    filename=os.path.join(LOG_PATH, "rad_raspberry.log"),
     level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s]: %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
@@ -33,15 +40,18 @@ def setup_excel_file():
     df = pd.DataFrame(
         columns=["Penn ID", "Badge ID", "All Swipe Data", "Badge Swipe Time"]
     )
-    df.to_excel(EXCEL_FILE_NAME, index=False)
+    df.to_excel(
+        os.path.join(BACKUP_PATH, EXCEL_FILE_NAME),
+        index=False,
+    )
 
 
 def send_email():
     try:
-        shutil.copy(
-            EXCEL_FILE_NAME, BACKUP_EXCEL_FILE_NAME
-        )  # Copy the working attendance file and save it as a backup
-        with open(EXCEL_FILE_NAME, mode="rb") as f:
+        with open(
+            os.path.join(BACKUP_PATH, EXCEL_FILE_NAME),
+            mode="rb",
+        ) as f:
             try:
                 buffer = f.read()
                 email = resend.Emails.send(
@@ -119,7 +129,9 @@ def main():
                 ts_str = datetime.now().__str__()
 
                 # Ensure the Excel file exists
-                if not os.path.exists(EXCEL_FILE_NAME):
+                if not os.path.exists(
+                    os.path.join(BACKUP_PATH, EXCEL_FILE_NAME)
+                ):
                     setup_excel_file()
 
                 # Write to the Excel file

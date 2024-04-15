@@ -135,7 +135,7 @@ def main():
                     setup_excel_file()
 
                 # Write to the Excel file
-                df = pd.read_excel(EXCEL_FILE_NAME)
+                df = pd.read_excel(os.path.join(BACKUP_PATH, EXCEL_FILE_NAME))
                 new_row = pd.DataFrame(
                     [[penn_id, badge_id, card_info, ts_str]],
                     columns=[
@@ -146,7 +146,9 @@ def main():
                     ],
                 )
                 df = pd.concat([df, new_row], ignore_index=True)
-                df.to_excel(EXCEL_FILE_NAME, index=False)
+                df.to_excel(
+                    os.path.join(BACKUP_PATH, EXCEL_FILE_NAME), index=False
+                )
         else:  # If not accepting swipes
             print("Not currently accepting swipes.")
             schedule.run_pending()

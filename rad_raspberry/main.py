@@ -74,8 +74,6 @@ def send_email():
                     f"An error occurred in sending an email: {str(e)}"
                 )
 
-        # Reset the Excel file
-        setup_excel_file()
     except Exception as e:
         logging.error(
             f"An error occurred in backing up the attendance file: {str(e)}"
@@ -91,6 +89,8 @@ schedule.every().friday.at(config["Operation"]["close_time"]).do(send_email)
 
 
 def main():
+    setup_excel_file()
+
     while True:
         now = datetime.now()
         today_open_time = now.replace(
@@ -127,12 +127,6 @@ def main():
                 ]  # Remove trailing '0'
                 badge_id = card_info.split("=")[1][1:]  # Remove leading '1'
                 ts_str = datetime.now().__str__()
-
-                # Ensure the Excel file exists
-                if not os.path.exists(
-                    os.path.join(BACKUP_PATH, EXCEL_FILE_NAME)
-                ):
-                    setup_excel_file()
 
                 # Write to the Excel file
                 df = pd.read_excel(os.path.join(BACKUP_PATH, EXCEL_FILE_NAME))

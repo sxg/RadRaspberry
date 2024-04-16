@@ -23,7 +23,7 @@ config = configparser.ConfigParser()
 config.read(os.path.join(CONFIG_PATH, "config.ini"))
 
 EXCEL_FILE_NAME = f"{config['Email']['attachment_prefix']} ({datetime.now().strftime('%Y-%m-%d %H-%M-%S)')}.xlsx"
-LOG_FILE_NAME = f"Log {datetime.now().strftime('%Y-%m-%d')}"
+LOG_FILE_NAME = f"Log {datetime.now().strftime('%Y-%m-%d')}.log"
 
 resend.api_key = config["API"]["api_key"]
 

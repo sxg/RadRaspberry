@@ -23,12 +23,13 @@ config = configparser.ConfigParser()
 config.read(os.path.join(CONFIG_PATH, "config.ini"))
 
 EXCEL_FILE_NAME = f"{config['Email']['attachment_prefix']} ({datetime.now().strftime('%Y-%m-%d %H-%M-%S)')}.xlsx"
+LOG_FILE_NAME = f"Log {datetime.now().strftime('%Y-%m-%d')}"
 
 resend.api_key = config["API"]["api_key"]
 
 # Configure logging
 logging.basicConfig(
-    filename=os.path.join(LOG_PATH, "rad_raspberry.log"),
+    filename=os.path.join(LOG_PATH, LOG_FILE_NAME),
     level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s]: %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",

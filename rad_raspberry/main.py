@@ -19,13 +19,7 @@ os.makedirs(LOG_PATH, exist_ok=True)
 os.makedirs(BACKUP_PATH, exist_ok=True)
 os.makedirs(CONFIG_PATH, exist_ok=True)
 
-config = configparser.ConfigParser()
-config.read(os.path.join(CONFIG_PATH, "config.ini"))
-
-EXCEL_FILE_NAME = f"{config['Email']['attachment_prefix']} ({datetime.now().strftime('%Y-%m-%d %H-%M-%S)')}.xlsx"
 LOG_FILE_NAME = f"Log {datetime.now().strftime('%Y-%m-%d')}.log"
-
-resend.api_key = config["API"]["api_key"]
 
 # Configure logging
 logging.basicConfig(
@@ -34,6 +28,21 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s]: %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
+
+# Read the config file
+config_file_path = os.path.join(CONFIG_PATH, "config.ini")
+config = configparser.ConfigParser()
+try:
+    with open(config_file_path, "r") as config_file:
+        config.read(config_file)
+except FileNotFoundError:
+    message = f"Config file not found at path {config_file_path}."
+    logging.error(message)
+    raise FileNotFoundError(message)
+
+EXCEL_FILE_NAME = f"{config['Email']['attachment_prefix']} ({datetime.now().strftime('%Y-%m-%d %H-%M-%S)')}.xlsx"
+
+resend.api_key = config["API"]["api_key"]
 
 
 def setup_excel_file():

@@ -46,7 +46,7 @@ resend.api_key = config["API"]["api_key"]
 
 
 def setup_excel_file():
-    # Creates a new Excel file with initial headers
+    # Creates/overwrites an Excel file with initial headers
     df = pd.DataFrame(
         columns=["Penn ID", "Badge ID", "All Swipe Data", "Badge Swipe Time"]
     )

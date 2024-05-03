@@ -55,13 +55,15 @@ resend.api_key = config["API"]["api_key"]
 
 def setup_excel_file():
     # Creates/overwrites an Excel file with initial headers
+    excel_file_path = os.path.join(BACKUP_PATH, EXCEL_FILE_NAME)
     df = pd.DataFrame(
         columns=["Penn ID", "Badge ID", "All Swipe Data", "Badge Swipe Time"]
     )
     df.to_excel(
-        os.path.join(BACKUP_PATH, EXCEL_FILE_NAME),
+        excel_file_path,
         index=False,
     )
+    logging.debug(f"Saved new Excel file at {excel_file_path}.")
 
 
 def send_email():

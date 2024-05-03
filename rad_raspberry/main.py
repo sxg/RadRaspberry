@@ -49,31 +49,34 @@ except FileNotFoundError as e:
     raise
 
 EXCEL_FILE_NAME = f"{config['Email']['attachment_prefix']} ({datetime.now().strftime('%Y-%m-%d %H-%M-%S)')}.xlsx"
+EXCEL_FILE_PATH = os.path.join(BACKUP_PATH, EXCEL_FILE_NAME)
 
 resend.api_key = config["API"]["api_key"]
 
 
 def setup_excel_file():
     # Creates/overwrites an Excel file with initial headers
-    excel_file_path = os.path.join(BACKUP_PATH, EXCEL_FILE_NAME)
     df = pd.DataFrame(
         columns=["Penn ID", "Badge ID", "All Swipe Data", "Badge Swipe Time"]
     )
     df.to_excel(
-        excel_file_path,
+        EXCEL_FILE_PATH,
         index=False,
     )
-    logging.debug(f"Saved new Excel file at {excel_file_path}.")
+    logging.debug(f"Saved new Excel file at {EXCEL_FILE_PATH}.")
 
 
 def send_email():
     try:
         with open(
-            os.path.join(BACKUP_PATH, EXCEL_FILE_NAME),
+            EXCEL_FILE_PATH,
             mode="rb",
         ) as f:
             try:
                 buffer = f.read()
+                logging.debug(
+                    f"Opened Excel file at {EXCEL_FILE_PATH} to prepare for emailing."
+                )
                 email = resend.Emails.send(
                     {
                         "text": config["Email"]["email_subject"],
@@ -96,7 +99,7 @@ def send_email():
 
     except Exception as e:
         logging.error(
-            f"An error occurred in backing up the attendance file: {str(e)}"
+            f"An error occurred in saving the attendance file: {str(e)}"
         )
 
 

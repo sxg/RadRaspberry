@@ -28,6 +28,8 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s]: %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
+schedule_logger = logging.getLogger("schedule")
+schedule_logger.setLevel(logging.DEBUG)
 
 # Read the config file
 config_file_path = os.path.join(CONFIG_PATH, "config.ini")

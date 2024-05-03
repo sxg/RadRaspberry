@@ -35,12 +35,18 @@ schedule_logger.setLevel(logging.DEBUG)
 config_file_path = os.path.join(CONFIG_PATH, "config.ini")
 config = configparser.ConfigParser()
 try:
-    with open(config_file_path, "r") as config_file:
-        config.read(config_file)
-except FileNotFoundError:
-    message = f"Config file not found at path {config_file_path}."
-    logging.error(message)
-    raise FileNotFoundError(message)
+    config_file = config.read(config_file_path)
+    if not config_file:
+        raise FileNotFoundError(
+            f"Config file not found at path {config_file_path}."
+        )
+    else:
+        logging.debug(
+            f"Configuration file at {config_file_path} successfully loaded."
+        )
+except FileNotFoundError as e:
+    logging.error(str(e))
+    raise
 
 EXCEL_FILE_NAME = f"{config['Email']['attachment_prefix']} ({datetime.now().strftime('%Y-%m-%d %H-%M-%S)')}.xlsx"
 

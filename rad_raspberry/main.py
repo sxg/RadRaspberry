@@ -128,11 +128,15 @@ def main():
         try:
             card_info = timedinput("Swipe badge: ", timeout=SWIPE_TIMEOUT)
             # If the input didn't time out and format basically makes sense
+            logging.debug(f"Input detected: {card_info}")
             if card_info.count("=") == 2 and len(card_info) > 15:
                 # Remove the trailing "0"
                 penn_id = card_info.split("?")[0].split("%")[1][:-1]
                 badge_id = card_info.split("=")[1][1:]  # Remove leading "1"
                 timestamp = datetime.now().__str__()
+                logging.info(
+                    f"Swipe detected with Penn ID: {penn_id} and Badge ID: {badge_id}"
+                )
 
                 # Save data to the Excel file
                 df = pd.read_excel(EXCEL_FILE_PATH)
@@ -142,6 +146,7 @@ def main():
                 )
                 df = pd.concat([df, new_row], ignore_index=True)
                 df.to_excel(EXCEL_FILE_PATH, index=False)
+                logging.debug(f"Updated Excel file at {EXCEL_FILE_PATH}.")
         except TimeoutOccurred as e:
             pass
 

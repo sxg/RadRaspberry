@@ -4,7 +4,7 @@ import pandas as pd
 from termios import tcflush, TCIOFLUSH
 from timedinput import timedinput, TimeoutOccurred
 import time
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import schedule
 import resend
 import logging
@@ -76,6 +76,30 @@ def add_row_to_excel_file(data):
     logging.debug(f"Updated Excel file at {EXCEL_FILE_PATH}.")
 
 
+def clean_state_files():
+    # Timestamp for 30 days ago
+    cutoff_time = datetime.now() - timedelta(days=30)
+    for filename in os.listdir(BACKUP_PATH):
+        file_path = os.path.join(BACKUP_PATH, filename)
+        if os.path.isfile(file_path):
+            file_modified_time = datetime.fromtimestamp(
+                os.path.getmtime(file_path)
+            )
+            if file_modified_time < cutoff_time:
+                os.remove(file_path)
+                logging.info(f"Deleting backup file at {file_path}.")
+
+    for filename in os.listdir(LOG_PATH):
+        file_path = os.path.join(LOG_PATH, filename)
+        if os.path.isfile(file_path):
+            file_modified_time = datetime.fromtimestamp(
+                os.path.getmtime(file_path)
+            )
+            if file_modified_time < cutoff_time:
+                os.remove(file_path)
+                logging.info(f"Deleting log file at {file_path}.")
+
+
 def send_email():
     try:
         with open(EXCEL_FILE_PATH, mode="rb") as f:
@@ -131,6 +155,7 @@ schedule.every().friday.at(config["Operation"]["close_time"]).do(send_email)
 
 
 def main():
+    clean_state_files()  # Delete old backup and log files
     setup_excel_file()  # Create a new Excel file
 
     now = datetime.now()

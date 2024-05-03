@@ -57,14 +57,23 @@ SWIPE_TIMEOUT = 60  # Seconds to wait for a swipe
 resend.api_key = config["API"]["api_key"]
 
 
+# Creates/overwrites an Excel file with initial headers
 def setup_excel_file():
-    # Creates/overwrites an Excel file with initial headers
     df = pd.DataFrame(columns=EXCEL_COLUMNS)
     df.to_excel(
         EXCEL_FILE_PATH,
         index=False,
     )
     logging.debug(f"Saved new Excel file at {EXCEL_FILE_PATH}.")
+
+
+# Save data to the Excel file
+def add_row_to_excel_file(data):
+    df = pd.read_excel(EXCEL_FILE_PATH)
+    new_row = pd.DataFrame([data], columns=EXCEL_COLUMNS)
+    df = pd.concat([df, new_row], ignore_index=True)
+    df.to_excel(EXCEL_FILE_PATH, index=False)
+    logging.debug(f"Updated Excel file at {EXCEL_FILE_PATH}.")
 
 
 def send_email():
@@ -104,6 +113,17 @@ def send_email():
         )
 
 
+def parse_card_info(card_info):
+    if card_info.count("=") == 2 and len(card_info) > 15:
+        # Remove the trailing "0"
+        penn_id = card_info.split("?")[0].split("%")[1][:-1]
+        badge_id = card_info.split("=")[1][1:]  # Remove leading "1"
+        timestamp = datetime.now().__str__()
+        return [penn_id, badge_id, card_info, timestamp]
+    else:
+        return None
+
+
 # Schedule the email
 schedule.every().monday.at(config["Operation"]["close_time"]).do(send_email)
 schedule.every().tuesday.at(config["Operation"]["close_time"]).do(send_email)
@@ -129,25 +149,15 @@ def main():
             card_info = timedinput("Swipe badge: ", timeout=SWIPE_TIMEOUT)
             # If the input didn't time out and format basically makes sense
             logging.debug(f"Input detected: {card_info}")
-            if card_info.count("=") == 2 and len(card_info) > 15:
-                # Remove the trailing "0"
-                penn_id = card_info.split("?")[0].split("%")[1][:-1]
-                badge_id = card_info.split("=")[1][1:]  # Remove leading "1"
-                timestamp = datetime.now().__str__()
+            data = parse_card_info(card_info)
+            if data:
                 logging.info(
-                    f"Swipe detected with Penn ID: {penn_id} and Badge ID: {badge_id}"
+                    f"Swipe detected with Penn ID: {data[0]} and Badge ID: {data[1]}"
                 )
+                add_row_to_excel_file(data)
 
-                # Save data to the Excel file
-                df = pd.read_excel(EXCEL_FILE_PATH)
-                new_row = pd.DataFrame(
-                    [[penn_id, badge_id, card_info, timestamp]],
-                    columns=EXCEL_COLUMNS,
-                )
-                df = pd.concat([df, new_row], ignore_index=True)
-                df.to_excel(EXCEL_FILE_PATH, index=False)
-                logging.debug(f"Updated Excel file at {EXCEL_FILE_PATH}.")
         except TimeoutOccurred as e:
+            logging.error("Swipe timed out.")
             pass
 
         now = datetime.now()  # Update the timestamp for the next loop

@@ -78,10 +78,7 @@ def add_row_to_excel_file(data):
 
 def send_email():
     try:
-        with open(
-            EXCEL_FILE_PATH,
-            mode="rb",
-        ) as f:
+        with open(EXCEL_FILE_PATH, mode="rb") as f:
             try:
                 buffer = f.read()
                 logging.debug(
@@ -114,6 +111,7 @@ def send_email():
 
 
 def parse_card_info(card_info):
+    # If the input didn't time out and format basically makes sense
     if card_info.count("=") == 2 and len(card_info) > 15:
         # Remove the trailing "0"
         penn_id = card_info.split("?")[0].split("%")[1][:-1]
@@ -147,7 +145,6 @@ def main():
         tcflush(sys.stdin, TCIOFLUSH)
         try:
             card_info = timedinput("Swipe badge: ", timeout=SWIPE_TIMEOUT)
-            # If the input didn't time out and format basically makes sense
             logging.debug(f"Input detected: {card_info}")
             data = parse_card_info(card_info)
             if data:

@@ -2,7 +2,7 @@ import os
 import sys
 import pandas as pd
 from termios import tcflush, TCIOFLUSH
-from timedinput import timedinput
+from timedinput import timedinput, TimeoutOccurred
 import time
 from datetime import datetime, date
 import schedule
@@ -50,15 +50,16 @@ except FileNotFoundError as e:
 
 EXCEL_FILE_NAME = f"{config['Email']['attachment_prefix']} ({datetime.now().strftime('%Y-%m-%d %H-%M-%S)')}.xlsx"
 EXCEL_FILE_PATH = os.path.join(BACKUP_PATH, EXCEL_FILE_NAME)
+EXCEL_COLUMNS = ["Penn ID", "Badge ID", "All Swipe Data", "Badge Swipe Time"]
+
+SWIPE_TIMEOUT = 60  # Seconds to wait for a swipe
 
 resend.api_key = config["API"]["api_key"]
 
 
 def setup_excel_file():
     # Creates/overwrites an Excel file with initial headers
-    df = pd.DataFrame(
-        columns=["Penn ID", "Badge ID", "All Swipe Data", "Badge Swipe Time"]
-    )
+    df = pd.DataFrame(columns=EXCEL_COLUMNS)
     df.to_excel(
         EXCEL_FILE_PATH,
         index=False,
@@ -112,64 +113,41 @@ schedule.every().friday.at(config["Operation"]["close_time"]).do(send_email)
 
 
 def main():
-    setup_excel_file()
+    setup_excel_file()  # Create a new Excel file
 
-    while True:
-        now = datetime.now()
-        today_open_time = now.replace(
-            hour=int(config["Operation"]["open_time"].split(":")[0]),
-            minute=int(config["Operation"]["open_time"].split(":")[1]),
-            second=0,
-            microsecond=0,
-        )
-        today_close_time = now.replace(
-            hour=int(config["Operation"]["close_time"].split(":")[0]),
-            minute=int(config["Operation"]["close_time"].split(":")[1]),
-            second=0,
-            microsecond=0,
-        )
+    now = datetime.now()
+    close_time = now.replace(
+        hour=int(config["Operation"]["close_time"].split(":")[0]),
+        minute=int(config["Operation"]["close_time"].split(":")[1]),
+        second=0,
+        microsecond=0,
+    )
+    while now < close_time:  # If accepting swipes
+        # Clear standard input before taking input
+        tcflush(sys.stdin, TCIOFLUSH)
+        try:
+            card_info = timedinput("Swipe badge: ", timeout=SWIPE_TIMEOUT)
+            # If the input didn't time out and format basically makes sense
+            if card_info.count("=") == 2 and len(card_info) > 15:
+                # Remove the trailing "0"
+                penn_id = card_info.split("?")[0].split("%")[1][:-1]
+                badge_id = card_info.split("=")[1][1:]  # Remove leading "1"
+                timestamp = datetime.now().__str__()
 
-        if (
-            now > today_open_time and now < today_close_time
-        ):  # If accepting swipes
-            tcflush(
-                sys.stdin, TCIOFLUSH
-            )  # Flush stdin before taking new input
-            card_info = timedinput(
-                "Swipe badge: ",
-                timeout=int(config["Operation"]["swipe_timeout"]),
-                default="TIMEOUT",
-            )
-            if (
-                card_info != "TIMEOUT"
-                and card_info.count("=") == 2
-                and len(card_info) > 15
-            ):  # If the input didn't time out and format basically makes sense
-                penn_id = card_info.split("?")[0].split("%")[1][
-                    :-1
-                ]  # Remove trailing '0'
-                badge_id = card_info.split("=")[1][1:]  # Remove leading '1'
-                ts_str = datetime.now().__str__()
-
-                # Write to the Excel file
-                df = pd.read_excel(os.path.join(BACKUP_PATH, EXCEL_FILE_NAME))
+                # Save data to the Excel file
+                df = pd.read_excel(EXCEL_FILE_PATH)
                 new_row = pd.DataFrame(
-                    [[penn_id, badge_id, card_info, ts_str]],
-                    columns=[
-                        "Penn ID",
-                        "Badge ID",
-                        "All Swipe Data",
-                        "Badge Swipe Time",
-                    ],
+                    [[penn_id, badge_id, card_info, timestamp]],
+                    columns=EXCEL_COLUMNS,
                 )
                 df = pd.concat([df, new_row], ignore_index=True)
-                df.to_excel(
-                    os.path.join(BACKUP_PATH, EXCEL_FILE_NAME), index=False
-                )
-        else:  # If not accepting swipes
-            print("Not currently accepting swipes.")
-            schedule.run_pending()
-            time.sleep(int(config["Operation"]["swipe_timeout"]))
+                df.to_excel(EXCEL_FILE_PATH, index=False)
+        except TimeoutOccurred as e:
+            pass
+
+        now = datetime.now()  # Update the timestamp for the next loop
+
+    schedule.run_pending()  # Email the Excel file
 
 
 if __name__ == "__main__":

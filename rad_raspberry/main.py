@@ -10,6 +10,7 @@ import resend
 import logging
 import shutil
 import configparser
+from supabase import create_client
 
 # Create folders for logs, backups, and config file if needed
 LOG_PATH = os.path.expanduser("~/.local/state/rad_raspberry/log")
@@ -54,7 +55,25 @@ EXCEL_COLUMNS = ["Penn ID", "Badge ID", "All Swipe Data", "Badge Swipe Time"]
 
 SWIPE_TIMEOUT = 60  # Seconds to wait for a swipe
 
-resend.api_key = config["API"]["api_key"]
+resend.api_key = config["API"]["resend_api_key"]
+supabase = create_client(
+    config["API"]["supabase_url"], config["API"]["supabase_api_key"]
+)
+try:
+    supabase.auth.sign_in_with_password(
+        {
+            "email": config["API"]["supabase_username"],
+            "password": config["API"]["supabase_password"],
+        }
+    )
+    logging.info(
+        f"Signed in to Supabase as {config['API']['supabase_username']}."
+    )
+except Exception as e:
+    logging.error(
+        f"Error logging in to Supabase as {config['API']['supabase_username']}: {str(e)}"
+    )
+    raise
 
 
 # Creates/overwrites an Excel file with initial headers
@@ -173,6 +192,13 @@ def main():
             logging.debug(f"Input detected: {card_info}")
             data = parse_card_info(card_info)
             if data:
+                supabase.table("attendance").insert(
+                    {
+                        "penn_id": data[0],
+                        "raw_data": card_info,
+                        "time": data[3],
+                    }
+                ).execute()
                 logging.info(
                     f"Swipe detected with Penn ID: {data[0]} and Badge ID: {data[1]}"
                 )

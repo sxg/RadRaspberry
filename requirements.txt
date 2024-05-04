@@ -3,3 +3,4 @@ resend==0.8.0
 schedule==1.2.0
 timedinput==0.1.1
 openpyxl==3.1.2
+supabase

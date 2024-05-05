@@ -4,7 +4,7 @@ import pandas as pd
 from termios import tcflush, TCIOFLUSH
 from timedinput import timedinput, TimeoutOccurred
 import time
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 import schedule
 import resend
 import logging
@@ -159,7 +159,7 @@ def parse_card_info(card_info):
         # Remove the trailing "0"
         penn_id = card_info.split("?")[0].split("%")[1][:-1]
         badge_id = card_info.split("=")[1][1:]  # Remove leading "1"
-        timestamp = datetime.now().__str__()
+        timestamp = datetime.now(timezone.utc).__str__()
         if len(penn_id) < 7:  # More format checking
             return None
         else:

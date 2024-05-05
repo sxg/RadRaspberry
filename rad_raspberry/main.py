@@ -160,7 +160,10 @@ def parse_card_info(card_info):
         penn_id = card_info.split("?")[0].split("%")[1][:-1]
         badge_id = card_info.split("=")[1][1:]  # Remove leading "1"
         timestamp = datetime.now().__str__()
-        return [penn_id, badge_id, card_info, timestamp]
+        if len(penn_id) < 7:  # More format checking
+            return None
+        else:
+            return [penn_id, badge_id, card_info, timestamp]
     else:
         return None
 

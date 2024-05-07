@@ -51,7 +51,13 @@ except FileNotFoundError as e:
 
 EXCEL_FILE_NAME = f"{config['Email']['attachment_prefix']} ({datetime.now().strftime('%Y-%m-%d %H-%M-%S)')}.xlsx"
 EXCEL_FILE_PATH = os.path.join(BACKUP_PATH, EXCEL_FILE_NAME)
-EXCEL_COLUMNS = ["Penn ID", "Badge ID", "All Swipe Data", "Badge Swipe Time"]
+EXCEL_COLUMNS = [
+    "Penn ID",
+    "Badge ID",
+    "All Swipe Data",
+    "Badge Swipe Time",
+    "Location",
+]
 
 SWIPE_TIMEOUT = 60  # Seconds to wait for a swipe
 
@@ -163,7 +169,13 @@ def parse_card_info(card_info):
         if len(penn_id) < 7:  # More format checking
             return None
         else:
-            return [penn_id, badge_id, card_info, timestamp]
+            return [
+                penn_id,
+                badge_id,
+                card_info,
+                timestamp,
+                config["Operation"]["Location"],
+            ]
     else:
         return None
 
@@ -198,12 +210,13 @@ def main():
                 supabase.table("attendance").insert(
                     {
                         "penn_id": data[0],
+                        "location": config["Operation"]["Location"],
                         "raw_data": card_info,
                         "time": data[3],
                     }
                 ).execute()
                 logging.info(
-                    f"Swipe detected with Penn ID: {data[0]} and Badge ID: {data[1]}"
+                    f"Swipe detected with Penn ID: {data[0]} and Badge ID: {data[1]} at location: {config['Operation']['Location']}."
                 )
                 add_row_to_excel_file(data)
 

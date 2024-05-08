@@ -5,8 +5,6 @@ from termios import tcflush, TCIOFLUSH
 from timedinput import timedinput, TimeoutOccurred
 import time
 from datetime import datetime, date, timedelta, timezone
-import schedule
-import resend
 import logging
 import shutil
 import configparser
@@ -29,8 +27,6 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s]: %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
-schedule_logger = logging.getLogger("schedule")
-schedule_logger.setLevel(logging.DEBUG)
 
 # Read the config file
 config_file_path = os.path.join(CONFIG_PATH, "config.ini")
@@ -61,7 +57,6 @@ EXCEL_COLUMNS = [
 
 SWIPE_TIMEOUT = 60  # Seconds to wait for a swipe
 
-resend.api_key = config["API"]["resend_api_key"]
 supabase = create_client(
     config["API"]["supabase_url"], config["API"]["supabase_api_key"]
 )
@@ -125,40 +120,6 @@ def clean_state_files():
                 logging.info(f"Deleting log file at {file_path}.")
 
 
-def send_email():
-    try:
-        with open(EXCEL_FILE_PATH, mode="rb") as f:
-            try:
-                buffer = f.read()
-                logging.debug(
-                    f"Opened Excel file at {EXCEL_FILE_PATH} to prepare for emailing."
-                )
-                email = resend.Emails.send(
-                    {
-                        "text": config["Email"]["email_subject"],
-                        "from": config["Email"]["from_email"],
-                        "to": config["Email"]["to_email"],
-                        "subject": f"{config['Email']['email_subject']} {date.today().strftime(' (%A, %B %d, %Y)')}",
-                        "attachments": [
-                            {
-                                "filename": EXCEL_FILE_NAME,
-                                "content": list(buffer),
-                            }
-                        ],
-                    }
-                )
-                logging.info(f"Email sent: {email}")
-            except Exception as e:
-                logging.error(
-                    f"An error occurred in sending an email: {str(e)}"
-                )
-
-    except Exception as e:
-        logging.error(
-            f"An error occurred in saving the attendance file: {str(e)}"
-        )
-
-
 def parse_card_info(card_info):
     # If the input didn't time out and format basically makes sense
     if card_info.count("=") == 2 and len(card_info) > 15:
@@ -178,14 +139,6 @@ def parse_card_info(card_info):
             ]
     else:
         return None
-
-
-# Schedule the email
-schedule.every().monday.at(config["Operation"]["close_time"]).do(send_email)
-schedule.every().tuesday.at(config["Operation"]["close_time"]).do(send_email)
-schedule.every().wednesday.at(config["Operation"]["close_time"]).do(send_email)
-schedule.every().thursday.at(config["Operation"]["close_time"]).do(send_email)
-schedule.every().friday.at(config["Operation"]["close_time"]).do(send_email)
 
 
 def main():
@@ -226,8 +179,6 @@ def main():
             pass
 
         now = datetime.now()  # Update the timestamp for the next loop
-
-    schedule.run_pending()  # Email the Excel file
 
 
 if __name__ == "__main__":

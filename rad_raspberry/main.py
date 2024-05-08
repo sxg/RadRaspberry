@@ -210,6 +210,7 @@ def main():
                 supabase.table("attendance").insert(
                     {
                         "penn_id": data[0],
+                        "badge_id": data[1],
                         "location": config["Operation"]["Location"],
                         "raw_data": card_info,
                         "time": data[3],

@@ -45,7 +45,7 @@ except FileNotFoundError as e:
     logging.error(str(e))
     raise
 
-EXCEL_FILE_NAME = f"{config['Email']['attachment_prefix']} ({datetime.now().strftime('%Y-%m-%d %H-%M-%S)')}.xlsx"
+EXCEL_FILE_NAME = f"{config['Operation']['Location']} ({datetime.now().strftime('%Y-%m-%d %H-%M-%S)')}.xlsx"
 EXCEL_FILE_PATH = os.path.join(BACKUP_PATH, EXCEL_FILE_NAME)
 EXCEL_COLUMNS = [
     "Penn ID",

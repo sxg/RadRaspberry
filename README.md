@@ -1,36 +1,39 @@
 # rad_raspberry
 
-This is a small script that will read badge swipes from a card reader via standard input to take attendance. A `config.py` file is required but not included since it contains a password and deployment specific information. Here's a sample `config.py` file:
+This is a CLI tool that runs on Linux and macOS that will read badge swipes from a card reader via standard input to take attendance and record the data to Supabase.
 
-```python
-from_email = "from_me@gmail.com"
-to_emails = ["to_you@gmail.com", "also_to_you@yahoo.com"]
-password = "password"
-email_subject = "Subject Line of My Email"
-open_time = "06:30"  # When to start accepting swipes (24 hr time)
-close_time = "08:25"  # When to stop accepting swipes (24 hr time)
-swipe_timeout = 3600  # Number of seconds to wait after last swipe
+## Installation
+
+This tool is designed to be deployed on Raspberry Pis running in headless mode, which you can setup through the Raspberry Pis’ system settings. Install this tool using `pip`:
+```bash
+pip install -U git+https://github.com/sxg/rad_raspberry
 ```
 
-# Installation
+Note: you might need to add the `--break-system-packages` flag at the end to install the tool globally. You can confirm the installation and version with `pip show rad_raspberry`. 
 
-This script is intended to run on a Raspberry Pi in headless mode. To have the script automatically run when starting the Raspberry Pi, call the script from `~/.bashrc`:
-
-```python
-python /path/to/script/rad_raspberry/main.py
-````
-
-## Automatic Updates
-
-This is a bare bones script, and so is the "automatic update" mechanism. Just pull the repository from GitHub in `~/.bashrc` before running the script:
-
-```python
-sleep 30
-git -C /path/to/script/rad_raspberry pull -f origin main
-python /path/to/script/rad_raspberry/main.py
+### Config
+A `config.ini` file is required and located at `~/.config/rad_raspberry/config.ini`. Here are the required values in a sample `config.ini` file:
 ```
+[API]
+supabase_url = <Supabase URL>
+supabase_api_key = <Supabase API Key>
+supabase_username = <Supabase Username>
+supabase_password = <Supabase Password>
 
-The `sleep 30` command pauses for 30 seconds to allow the Raspberry Pi time to connect to WiFi.
+[Operation]
+# When to stop accepting swipes (24 hr time in local timezone)
+close_time = 09:00
+location = HUP
+```
+`close_time` specifies when the script stops running for the day. `location` is a text description that uniquely identifies the Raspberry Pi. This is represented as an enum in the Supabase `attendance` table, so if you want to use a new value here, be sure to also add it to the defined enum in Supabase.
+
+## Updates
+
+You can update this tool with the same command you used to install it:
+```bash
+pip install -U git+https://github.com/sxg/rad_raspberry
+```
+This will install the latest committed version on the `main` branch. Remember to update the version number of the tool in `setup.py`.
 
 ## Automatic Reboot
 

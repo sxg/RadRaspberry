@@ -152,6 +152,7 @@ def main():
         second=0,
         microsecond=0,
     )
+    swipes = 0
     while now < close_time:  # If accepting swipes
         # Clear standard input before taking input
         tcflush(sys.stdin, TCIOFLUSH)
@@ -173,6 +174,7 @@ def main():
                     f"Swipe detected with Penn ID: {data[0]} and Badge ID: {data[1]} at location: {config['Operation']['Location']}."
                 )
                 add_row_to_excel_file(data)
+                swipes += 1
 
         except TimeoutOccurred as e:
             logging.error("Swipe timed out.")
@@ -180,8 +182,9 @@ def main():
 
         now = datetime.now()  # Update the timestamp for the next loop
 
-    # Send the attendance summary email
-    supabase.functions.invoke("attendance-summary-email")
+    # Send the attendance summary email if there's anything to send
+    if swipes > 0:
+        supabase.functions.invoke("attendance-summary-email")
 
     # Tear down
     logging.shutdown()

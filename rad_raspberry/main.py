@@ -180,6 +180,9 @@ def main():
 
         now = datetime.now()  # Update the timestamp for the next loop
 
+    # Send the attendance summary email
+    supabase.functions.invoke("attendance-summary-email")
+
     # Tear down
     logging.shutdown()
     supabase.auth.sign_out()

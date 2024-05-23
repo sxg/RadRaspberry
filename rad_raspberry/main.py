@@ -180,6 +180,10 @@ def main():
 
         now = datetime.now()  # Update the timestamp for the next loop
 
+    # Tear down
+    logging.shutdown()
+    supabase.auth.sign_out()
+
 
 if __name__ == "__main__":
     main()

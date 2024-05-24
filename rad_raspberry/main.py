@@ -183,7 +183,8 @@ def main():
         now = datetime.now()  # Update the timestamp for the next loop
 
     # Send the attendance summary email if there's anything to send
-    if swipes > 0:
+    # Only want to send one summary email, so put that responsibility on the HUP device
+    if swipes > 0 and config["Operation"]["Location"] == "HUP":
         supabase.functions.invoke("attendance-summary-email")
 
     # Tear down

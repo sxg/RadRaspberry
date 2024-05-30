@@ -185,6 +185,8 @@ def main():
     # Send the attendance summary email if there's anything to send
     # Only want to send one summary email, so put that responsibility on the HUP device
     if swipes > 0 and config["Operation"]["Location"] == "HUP":
+        logging.info(
+            f"Invoking attendance-summary-email edge function with {swipes} swipe(s).")
         supabase.functions.invoke("attendance-summary-email")
 
     # Tear down

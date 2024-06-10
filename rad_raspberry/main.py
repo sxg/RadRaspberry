@@ -9,6 +9,7 @@ import logging
 import shutil
 import configparser
 from supabase import create_client
+from postgrest.exceptions import APIError
 
 # Create folders for logs, backups, and config file if needed
 LOG_PATH = os.path.expanduser("~/.local/state/rad_raspberry/log")
@@ -177,7 +178,10 @@ def main():
                 swipes += 1
 
         except TimeoutOccurred:
-            logging.error("Swipe timed out.")
+            logging.debug("Swipe timed out.")
+            pass
+        except APIError as e:
+            logging.error(f"Supabase API Error: {e}")
             pass
 
         now = datetime.now()  # Update the timestamp for the next loop

@@ -176,7 +176,7 @@ def main():
                 add_row_to_excel_file(data)
                 swipes += 1
 
-        except TimeoutOccurred as e:
+        except TimeoutOccurred:
             logging.error("Swipe timed out.")
             pass
 
@@ -190,6 +190,7 @@ def main():
         supabase.functions.invoke("attendance-summary-email")
 
     # Tear down
+    logging.info("Shutting down...")
     logging.shutdown()
     supabase.auth.sign_out()
 

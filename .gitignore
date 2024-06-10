@@ -162,4 +162,3 @@ cython_debug/
 *.csv
 *.xlsx
 config.py
-rad_raspberry/

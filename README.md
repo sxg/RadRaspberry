@@ -9,7 +9,7 @@ This tool is designed to be deployed on Raspberry Pis running in headless mode, 
 pip install -U git+https://github.com/sxg/rad_raspberry
 ```
 
-Note: you might need to add the `--break-system-packages` flag at the end to install the tool globally. You can confirm the installation and version with `pip show rad_raspberry`. 
+Note: you might need to add the `--break-system-packages` flag at the end to install the tool globally. You can confirm the installation and version with `pip show rad_raspberry`.
 
 ### Config
 A `config.ini` file is required and located at `~/.config/rad_raspberry/config.ini`. Here are the required values in a sample `config.ini` file:
@@ -19,6 +19,8 @@ supabase_url = <Supabase URL>
 supabase_api_key = <Supabase API Key>
 supabase_username = <Supabase Username>
 supabase_password = <Supabase Password>
+
+server_url = <tailscale url>
 
 [Operation]
 # When to stop accepting swipes (24 hr time in local timezone)
@@ -42,3 +44,27 @@ Since the Raspberry Pi will typically be connected to a guest WiFi network, it's
 0 4 * * * /usr/sbin/shutdown -r now
 ```
 This will automatically restart the Raspberry Pi every day at 4 am, and on startup, it should automatically reconnect to the same WiFi network with a fresh connection.
+
+
+# Server Config
+
+install server requirements in `server-requirements.txt`
+
+create an env file and load into environment that server will be running in. can consider using dotenv or just `export $(cat .env | xargs)`
+
+```
+EMAIL_FROM="Penn Radiology <attendance@pennrads.com>"
+EMAIL_API_URL=https://api.resend.com/emails
+EMAIL_API_TOKEN=<token>
+SUMMARY_RECIPIENT=<recipient email>
+```
+
+start the server using. Start only on one raspberry pi. Note the IP or domain name for this pi. You'll need to update all clients to point to this server in the config above, `server_url`. Be sure to include the port.
+```
+uvicorn server:app --reload --timeout-keep-alive 120
+```
+
+To send a daily summary email using the server architecture at 9am, add this to your crontab:
+```
+0 9 * * * /usr/bin/curl http://<server url>/send-summary
+```

@@ -46,7 +46,7 @@ Since the Raspberry Pi will typically be connected to a guest WiFi network, it's
 This will automatically restart the Raspberry Pi every day at 4 am, and on startup, it should automatically reconnect to the same WiFi network with a fresh connection.
 
 
-# Server Config
+# server config
 
 install server requirements in `server-requirements.txt`
 
@@ -61,12 +61,13 @@ SUMMARY_RECIPIENT=<recipient email>
 create a csv of all residents with the following columns:
 `name`, `email`, `badge_id`. Place it in `~/.local/state/rad_raspberry/residents.csv`
 
-start the server using. Start only on one raspberry pi. Note the (tailscale) IP or domain name for this pi. You'll need to update all clients to point to this server in the config above, `server_url`. Be sure to include the port.
+start the server:
 ```
 uvicorn server:app --reload --timeout-keep-alive 120
 ```
+start only on one raspberry pi. note the (tailscale) IP or domain name for this pi. you'll need to update all clients to point to this server in the config above, `server_url`. be sure to include the port.
 
-To send a daily summary email using the server architecture at 9am, add this to your crontab:
+to send a daily summary email using the server architecture at 9am, add this to your crontab:
 ```
 0 9 * * * /usr/bin/curl http://<server url>/send-summary
 ```

@@ -129,7 +129,7 @@ async def swipe(data: SwipeData):
 
     # Send email
     subject = f"Attendance Confirmed ({day})"
-    body = f"Hello {name}, your attendance has been recorded: </br> {pretty_now} </br> Penn Radiology"
+    body = f"Hello {name}, your attendance has been recorded: <br/> {pretty_now} <br/> Penn Radiology"
     send_email(email, subject, body)
 
     return {"message": "Swipe recorded and email sent"}

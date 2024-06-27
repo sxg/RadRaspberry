@@ -58,8 +58,10 @@ EMAIL_API_URL=https://api.resend.com/emails
 EMAIL_API_TOKEN=<token>
 SUMMARY_RECIPIENT=<recipient email>
 ```
+create a csv of all residents with the following columns:
+`name`, `email`, `badge_id`. Place it in `~/.local/state/rad_raspberry/residents.csv`
 
-start the server using. Start only on one raspberry pi. Note the IP or domain name for this pi. You'll need to update all clients to point to this server in the config above, `server_url`. Be sure to include the port.
+start the server using. Start only on one raspberry pi. Note the (tailscale) IP or domain name for this pi. You'll need to update all clients to point to this server in the config above, `server_url`. Be sure to include the port.
 ```
 uvicorn server:app --reload --timeout-keep-alive 120
 ```

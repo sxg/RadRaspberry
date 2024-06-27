@@ -10,6 +10,7 @@ import shutil
 import configparser
 from supabase import create_client
 from postgrest.exceptions import APIError
+import requests
 
 # Create folders for logs, backups, and config file if needed
 LOG_PATH = os.path.expanduser("~/.local/state/rad_raspberry/log")
@@ -161,7 +162,13 @@ def main():
             card_info = timedinput("Swipe badge: ", timeout=SWIPE_TIMEOUT)
             logging.debug(f"Input detected: {card_info}")
             data = parse_card_info(card_info)
+
             if data:
+                requests.post(
+                    f"http://{config["API"]["server_url"]}/swipe",
+                    json={"badge_id": data[1]},
+                )
+
                 supabase.table("attendance").insert(
                     {
                         "penn_id": data[0],
@@ -176,6 +183,7 @@ def main():
                 )
                 add_row_to_excel_file(data)
                 swipes += 1
+
 
         except TimeoutOccurred:
             logging.debug("Swipe timed out.")

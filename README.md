@@ -75,7 +75,7 @@ start only on one raspberry pi. note the (tailscale) IP or domain name for this 
 
 copy the service file to the appropriate location and start/enable service:
 ```
-ln -s /home/pennradiology/rad_raspberry/rad.service /usr/lib/systemd/system/rad.service
+sudo ln -s /home/pennradiology/rad_raspberry/rad.service /usr/lib/systemd/system/rad.service
 sudo systemctl daemon-reload
 sudo systemctl start rad
 sudo systemctl enable rad

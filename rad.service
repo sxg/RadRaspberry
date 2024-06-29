@@ -9,6 +9,8 @@ ExecStart=/home/pennradiology/.local/bin/uvicorn server:app --reload --timeout-k
 ExecStop=/usr/bin/docker compose down
 EnvironmentFile=/home/pennradiology/rad_raspberry/.env
 Restart=on-failure
+User=1000
+Group=1000
 
 [Install]
 WantedBy=multi-user.target

@@ -39,7 +39,7 @@ conn = sqlite3.connect(SWIPES_DB, check_same_thread=False)
 cursor = conn.cursor()
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS swipes
-    (badge_id TEXT, timestamp TEXT)
+    (penn_id TEXT, timestamp TEXT)
 ''')
 conn.commit()
 
@@ -58,7 +58,7 @@ email_headers = {
 }
 
 class SwipeData(BaseModel):
-    badge_id: str
+    penn_id: str
 
 def send_email(to: str, subject: str, body: str, attachments: list = list()):
     payload = {
@@ -97,7 +97,7 @@ def get_residents():
         RESIDENTS,
         dtype={
             "name": str,
-            "badge_id": str,
+            "penn_id": str,
             "email": str,
         }
     )
@@ -105,23 +105,23 @@ def get_residents():
 
 @app.post("/swipe")
 async def swipe(data: SwipeData):
-    badge_id = data.badge_id
+    penn_id = data.penn_id
     now = datetime.now(tz=timezone.utc)
     pretty_now = now.astimezone(ZoneInfo("America/New_York")).strftime('%Y-%m-%d, %I:%M:%S %p')
     day = datetime.now().astimezone(ZoneInfo("America/New_York")).strftime('%B %d, %Y')
-    logging.info(f"/swipe: {pretty_now} {badge_id} {now}")
+    logging.info(f"/swipe: {pretty_now} {penn_id} {now}")
 
     r = get_residents()
 
     # Find email for the badge ID
-    user_data = r[r['badge_id'] == badge_id]
+    user_data = r[r['penn_id'] == penn_id]
     if user_data.empty:
-        logging.error(f"unable to find {badge_id}")
+        logging.error(f"unable to find {penn_id}")
         raise HTTPException(status_code=404, detail="Badge ID not found")
 
     # Record swipe to database
-    cursor.execute("INSERT INTO swipes (badge_id, timestamp) VALUES (?, ?)",
-                   (badge_id, now))
+    cursor.execute("INSERT INTO swipes (penn_id, timestamp) VALUES (?, ?)",
+                   (penn_id, now))
     conn.commit()
 
     email = user_data['email'].iloc[0]
@@ -146,7 +146,7 @@ async def send_summary():
 
     # Read the data from the database into a DataFrame
     swipes_df = pd.read_sql_query(
-        "SELECT badge_id, timestamp FROM swipes WHERE timestamp > ?",
+        "SELECT penn_id, timestamp FROM swipes WHERE timestamp > ?",
         conn,
         params=[yesterday],
         parse_dates=["timestamp"],
@@ -154,7 +154,7 @@ async def send_summary():
 
     r = get_residents()
 
-    summary_df = swipes_df.merge(r, on='badge_id', how='left')
+    summary_df = swipes_df.merge(r, on='penn_id', how='left')
 
     as_ny = summary_df.timestamp.dt.tz_convert(ZoneInfo("America/New_York"))
     summary_df["swipe_time"] = as_ny.dt.strftime('%Y-%m-%d %I:%M:%S %p')

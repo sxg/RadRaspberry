@@ -167,7 +167,7 @@ def main():
                 try:
                     requests.post(
                         f"http://{config["API"]["server_url"]}/swipe",
-                        json={"badge_id": data[1]},
+                        json={"penn_id": data[0]},
                     )
                 except:
                     pass

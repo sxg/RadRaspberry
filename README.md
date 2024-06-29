@@ -84,5 +84,5 @@ sudo systemctl enable rad
 to send a daily summary email using the server architecture at 9am, add this to your crontab:
 
 ```
-0 9 * * * /usr/bin/curl http://<server url>/send-summary
+0 9 * * * /usr/bin/curl -X POST http://<server url>/send-summary
 ```

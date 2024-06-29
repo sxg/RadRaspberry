@@ -166,8 +166,8 @@ def main():
             if data:
                 try:
                     requests.post(
-                        f"http://{config["API"]["server_url"]}/swipe",
-                        json={"penn_id": data[0]},
+                        f"{config["API"]["server_url"]}/swipe",
+                        json={"penn_id": str(data[0])},
                     )
                 except:
                     pass

@@ -1,0 +1,14 @@
+[Unit]
+Description=rad
+After=network.service
+
+[Service]
+RemainAfterExit=true
+WorkingDirectory=/home/pennradiology/rad_raspberry/rad_raspberry
+ExecStart=/home/pennradiology/.local/bin/uvicorn server:app --reload --timeout-keep-alive 120 --port 3000
+ExecStop=/usr/bin/docker compose down
+EnvironmentFile=/home/pennradiology/rad_raspberry/.env
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -66,11 +66,20 @@ SUMMARY_RECIPIENT=<recipient email>
 create a csv of all residents with the following columns:
 `name`, `email`, `badge_id`. Place it in `~/.local/state/rad_raspberry/residents.csv`
 
-start the server:
+start the server to test:
 ```
 uvicorn server:app --reload --timeout-keep-alive 120
 ```
+
 start only on one raspberry pi. note the (tailscale) IP or domain name for this pi. you'll need to update all clients to point to this server in the config above, `server_url`. be sure to include the port.
+
+copy the service file to the appropriate location and start/enable service:
+```
+ln -s /home/pennradiology/rad_raspberry/rad.service /usr/lib/systemd/system/rad.service
+sudo systemctl daemon-reload
+sudo systemctl start rad
+sudo systemctl enable rad
+```
 
 to send a daily summary email using the server architecture at 9am, add this to your crontab:
 

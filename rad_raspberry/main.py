@@ -164,10 +164,13 @@ def main():
             data = parse_card_info(card_info)
 
             if data:
-                requests.post(
-                    f"http://{config["API"]["server_url"]}/swipe",
-                    json={"badge_id": data[1]},
-                )
+                try:
+                    requests.post(
+                        f"http://{config["API"]["server_url"]}/swipe",
+                        json={"badge_id": data[1]},
+                    )
+                except:
+                    pass
 
                 supabase.table("attendance").insert(
                     {

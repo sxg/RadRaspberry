@@ -11,6 +11,11 @@ pip install -U git+https://github.com/sxg/rad_raspberry
 
 Note: you might need to add the `--break-system-packages` flag at the end to install the tool globally. You can confirm the installation and version with `pip show rad_raspberry`.
 
+The current method for starting this file on startup (and every shell invocation) is by appending to `.bashrc`:
+```
+/home/pennradiology/.local/bin/rad_raspberry
+```
+
 ### Config
 A `config.ini` file is required and located at `~/.config/rad_raspberry/config.ini`. Here are the required values in a sample `config.ini` file:
 ```
@@ -68,6 +73,7 @@ uvicorn server:app --reload --timeout-keep-alive 120
 start only on one raspberry pi. note the (tailscale) IP or domain name for this pi. you'll need to update all clients to point to this server in the config above, `server_url`. be sure to include the port.
 
 to send a daily summary email using the server architecture at 9am, add this to your crontab:
+
 ```
 0 9 * * * /usr/bin/curl http://<server url>/send-summary
 ```

@@ -207,11 +207,6 @@ async def db():
                        ):
         return f"""
 <html>
-<style>
-table {{
-    width: 100%;
-}}
-</style>
 <body>
 {summary_df.to_html()}
 </body>

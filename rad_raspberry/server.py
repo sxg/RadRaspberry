@@ -178,5 +178,34 @@ async def send_summary():
 
     return {"message": f"summary sent to {SUMMARY_RECIPIENT}"}
 
+
+@app.get("/db")
+async def db():
+    logging.info(f"/db {now}")
+
+    # Read the data from the database into a DataFrame
+    swipes_df = pd.read_sql_query(
+        "SELECT penn_id, timestamp FROM swipes ORDER BY timestamp DESC",
+        conn,
+        parse_dates=["timestamp"],
+        )
+
+    if len(swipes_df) == 0:
+        return {"message": "No swipes since yesterday"}
+
+    r = get_residents()
+    summary_df = swipes_df.merge(r, on='penn_id', how='left')
+
+    as_ny = summary_df.timestamp.dt.tz_convert(ZoneInfo("America/New_York"))
+    summary_df["swipe_time"] = as_ny.dt.strftime('%Y-%m-%d %I:%M:%S %p')
+    summary_df = summary_df.drop("timestamp", axis=1)
+
+    with pd.option_context('display.max_rows', None,
+                       'display.max_columns', None,
+                       'display.precision', 3,
+                       ):
+        return summary_df.to_string()
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

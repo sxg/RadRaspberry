@@ -1,8 +1,11 @@
 #!/bin/bash
 
-# 0 0 * * 0
+# 0 0 1 * 0 every month
 
-LOG_DIR=/home/pennradiology/.local/state/rad_raspberry/log
+DIR=/home/pennradiology/.local/state/rad_raspberry
+BACKUP_DIR=${DIR}/backup
+LOG_DIR=${DIR}/log
 
-rm ${LOG_DIR}/last_week/*.log
-mv ${LOG_DIR}/*.log ${LOG_DIR}/last_week/
+mv ${BACKUP_DIR} ${BACKUP_DIR}-prior
+mv ${LOG_DIR} ${LOG_DIR}-prior
+mkdir ${BACKUP_DIR} ${LOG_DIR}

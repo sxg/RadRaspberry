@@ -152,7 +152,7 @@ async def send_summary():
         parse_dates=["timestamp"],
         )
 
-    if len(swipes_df) > 0:
+    if len(swipes_df) == 0:
         return {"message": "No swipes since yesterday"}
 
     r = get_residents()

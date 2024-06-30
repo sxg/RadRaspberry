@@ -152,6 +152,9 @@ async def send_summary():
         parse_dates=["timestamp"],
         )
 
+    if len(swipes_df) > 0:
+        return {"message": "No swipes since yesterday"}
+
     r = get_residents()
 
     summary_df = swipes_df.merge(r, on='penn_id', how='left')

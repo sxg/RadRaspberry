@@ -12,28 +12,11 @@ pip install -U git+https://github.com/sxg/rad_raspberry
 Note: you might need to add the `--break-system-packages` flag at the end to install the tool globally. You can confirm the installation and version with `pip show rad_raspberry`.
 
 The current method for starting this file on startup (and every shell invocation) is by appending to `.bashrc`:
-```
-/home/pennradiology/.local/bin/rad_raspberry
-```
 
-### Config
-A `config.ini` file is required and located at `~/.config/rad_raspberry/config.ini`. Here are the required values in a sample `config.ini` file:
 ```
-[API]
-supabase_url = <Supabase URL>
-supabase_api_key = <Supabase API Key>
-supabase_username = <Supabase Username>
-supabase_password = <Supabase Password>
+SERVER_URL=<server url> /home/pennradiology/.local/bin/rad_raspberry
 
-server_url = <tailscale url>
-
-[Operation]
-# When to stop accepting swipes (24 hr time in local timezone)
-close_time = 09:00
-location = HUP
 ```
-`close_time` specifies when the script stops running for the day. `location` is a text description that uniquely identifies the Raspberry Pi. This is represented as an enum in the Supabase `attendance` table, so if you want to use a new value here, be sure to also add it to the defined enum in Supabase.
-
 ## Updates
 
 You can update this tool with the same command you used to install it:

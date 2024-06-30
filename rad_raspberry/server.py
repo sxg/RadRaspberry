@@ -2,7 +2,7 @@ from pathlib import Path
 import os
 from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 import sqlite3
 from datetime import timezone
@@ -180,7 +180,7 @@ async def send_summary():
     return {"message": f"summary sent to {SUMMARY_RECIPIENT}"}
 
 
-@app.get("/db", response_class=PlainTextResponse)
+@app.get("/db", response_class=HTMLResponse)
 async def db():
     logging.info(f"/db")
 
@@ -205,7 +205,18 @@ async def db():
                        'display.max_columns', None,
                        'display.precision', 3,
                        ):
-        return summary_df.to_string()
+        return f"""
+<html>
+<style>
+table {{
+    width: 100%;
+}}
+</style>
+<body>
+{summary_df.to_html()}
+</body>
+</html>
+"""
 
 
 if __name__ == "__main__":

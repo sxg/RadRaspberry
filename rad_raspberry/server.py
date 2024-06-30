@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel
 import sqlite3
 from datetime import timezone
@@ -139,7 +140,7 @@ async def swipe(data: SwipeData):
 async def send_summary():
     now = datetime.now().astimezone(ZoneInfo("America/New_York")).strftime('%Y-%m-%d-%H:%M:%S')
     day = datetime.now().astimezone(ZoneInfo("America/New_York")).strftime('%B %d, %Y')
-    logging.info(f"/send-summary {now}")
+    logging.info(f"/send-summary")
 
     # Get swipes from the last day
     yesterday = (datetime.now() - timedelta(days=1)).isoformat()
@@ -179,9 +180,9 @@ async def send_summary():
     return {"message": f"summary sent to {SUMMARY_RECIPIENT}"}
 
 
-@app.get("/db")
+@app.get("/db", response_class=PlainTextResponse)
 async def db():
-    logging.info(f"/db {now}")
+    logging.info(f"/db")
 
     # Read the data from the database into a DataFrame
     swipes_df = pd.read_sql_query(

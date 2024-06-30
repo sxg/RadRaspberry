@@ -132,7 +132,7 @@ async def swipe(data: SwipeData):
     body = f"Hello {name}, your attendance has been recorded: <br/> {pretty_now} <br/> Penn Radiology"
     send_email(email, subject, body)
 
-    return {"message": "Swipe recorded and email sent"}
+    return {"message": f"swipe: {penn_id} {name} {email}"}
 
 
 @app.post("/send-summary")

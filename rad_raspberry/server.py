@@ -192,7 +192,7 @@ async def db():
         )
 
     if len(swipes_df) == 0:
-        return {"message": "No swipes since yesterday"}
+        return "<html>nil</html>"
 
     r = get_residents()
     summary_df = swipes_df.merge(r, on='penn_id', how='left')

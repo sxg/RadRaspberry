@@ -10,7 +10,9 @@ import shutil
 import configparser
 from supabase import create_client
 from postgrest.exceptions import APIError
-import requests
+
+import aiohttp
+import asyncio
 
 # Create folders for logs, backups, and config file if needed
 LOG_PATH = os.path.expanduser("~/.local/state/rad_raspberry/log")
@@ -144,7 +146,7 @@ def parse_card_info(card_info):
         return None
 
 
-def main():
+async def main():
     clean_state_files()  # Delete old backup and log files
     setup_excel_file()  # Create a new Excel file
 
@@ -156,48 +158,52 @@ def main():
         microsecond=0,
     )
     swipes = 0
-    while now < close_time:  # If accepting swipes
-        # Clear standard input before taking input
-        tcflush(sys.stdin, TCIOFLUSH)
-        try:
-            card_info = timedinput("Swipe badge: ", timeout=SWIPE_TIMEOUT)
-            logging.debug(f"Input detected: {card_info}")
-            data = parse_card_info(card_info)
 
-            if data:
-                try:
-                    r = requests.post(
-                        f"{config['API']['server_url']}/swipe",
-                        json={"penn_id": str(data[0])},
+    async with aiohttp.ClientSession(config['API']['server_url']) as session:
+
+        while now < close_time:  # If accepting swipes
+            # Clear standard input before taking input
+            tcflush(sys.stdin, TCIOFLUSH)
+            try:
+                card_info = timedinput("Swipe badge: ", timeout=SWIPE_TIMEOUT)
+                logging.debug(f"Input detected: {card_info}")
+                data = parse_card_info(card_info)
+
+                if data:
+                    try:
+                        async with session.post(
+                                '/swipe',
+                                json={"penn_id": str(data[0])},
+                            ):
+                            pass
+                    except Exception as e:
+                        logging.exception("request post")
+                        pass
+
+                    supabase.table("attendance").insert(
+                        {
+                            "penn_id": data[0],
+                            "badge_id": data[1],
+                            "location": config["Operation"]["Location"],
+                            "raw_data": card_info,
+                            "time": data[3],
+                        }
+                    ).execute()
+                    logging.info(
+                        f"Swipe detected with Penn ID: {data[0]} and Badge ID: {data[1]} at location: {config['Operation']['Location']}."
                     )
-                except Exception as e:
-                    logging.exception("request post")
-                    pass
-
-                supabase.table("attendance").insert(
-                    {
-                        "penn_id": data[0],
-                        "badge_id": data[1],
-                        "location": config["Operation"]["Location"],
-                        "raw_data": card_info,
-                        "time": data[3],
-                    }
-                ).execute()
-                logging.info(
-                    f"Swipe detected with Penn ID: {data[0]} and Badge ID: {data[1]} at location: {config['Operation']['Location']}."
-                )
-                add_row_to_excel_file(data)
-                swipes += 1
+                    add_row_to_excel_file(data)
+                    swipes += 1
 
 
-        except TimeoutOccurred:
-            logging.debug("Swipe timed out.")
-            pass
-        except APIError as e:
-            logging.error(f"Supabase API Error: {e}")
-            pass
+            except TimeoutOccurred:
+                logging.debug("Swipe timed out.")
+                pass
+            except APIError as e:
+                logging.error(f"Supabase API Error: {e}")
+                pass
 
-        now = datetime.now()  # Update the timestamp for the next loop
+            now = datetime.now()  # Update the timestamp for the next loop
 
     # Send the attendance summary email if there's anything to send
     # Only want to send one summary email, so put that responsibility on the HUP device
@@ -213,4 +219,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

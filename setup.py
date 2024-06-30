@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="rad_raspberry",
-    version="1.0.13",
+    version="1.0.14",
     packages=find_packages(),
     install_requires=[
         "pandas==2.0.3",
@@ -10,6 +10,8 @@ setup(
         "openpyxl==3.1.2",
         "supabase==2.4.5",
         "setuptools==69.5.1",
+        "asyncio",
+        "aiohttp",
     ],
     license="MIT",
     entry_points={

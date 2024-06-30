@@ -24,6 +24,7 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
+
 def parse_card_info(card_info):
     # If the input didn't time out and format basically makes sense
     if card_info.count("=") == 2 and len(card_info) > 15:

@@ -176,7 +176,7 @@ async def send_summary():
     ]
     send_email(SUMMARY_RECIPIENT, subject, body, attachments)
 
-    return {"message": "Summary sent successfully"}
+    return {"message": f"summary sent to {SUMMARY_RECIPIENT}"}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

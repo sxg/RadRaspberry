@@ -48,14 +48,14 @@ async def swipe(session, penn_id):
             '/swipe',
             json={"penn_id": penn_id},
         ) as r:
-            pass
+            logging.info(await r.text())
     except (KeyboardInterrupt, RuntimeError, CancelledError):
         pass
     except:
         logging.exception("error")
 
 
-async def main():
+async def run():
     tcflush(sys.stdin, TCIOFLUSH)
     async with aiohttp.ClientSession(SERVER_URL) as session:
         while True:
@@ -70,6 +70,8 @@ async def main():
             except:
                 logging.exception("error")
 
+def main():
+    asyncio.run(run())
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

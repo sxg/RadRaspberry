@@ -164,15 +164,12 @@ def main():
             logging.debug(f"Input detected: {card_info}")
             data = parse_card_info(card_info)
 
-            print("data loaded", data)
             if data:
                 try:
-                    print("trying request")
                     r = requests.post(
-                        f"{config["API"]["server_url"]}/swipe",
+                        f"{config['API']['server_url']}/swipe",
                         json={"penn_id": str(data[0])},
                     )
-                    print(r.content)
                 except Exception as e:
                     logging.exception("request post")
                     pass

@@ -169,7 +169,8 @@ def main():
                         f"{config["API"]["server_url"]}/swipe",
                         json={"penn_id": str(data[0])},
                     )
-                except:
+                except Exception as e:
+                    logging.exception("request post")
                     pass
 
                 supabase.table("attendance").insert(

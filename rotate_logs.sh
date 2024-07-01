@@ -8,4 +8,3 @@ LOG_DIR=${DIR}/log
 
 mv ${BACKUP_DIR} ${BACKUP_DIR}-prior
 mv ${LOG_DIR} ${LOG_DIR}-prior
-mkdir ${BACKUP_DIR} ${LOG_DIR}
